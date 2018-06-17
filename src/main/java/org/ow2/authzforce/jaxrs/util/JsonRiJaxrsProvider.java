@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2017 Thales Services SAS.
+ * Copyright 2012-2018 Thales Services SAS.
  *
  * This file is part of AuthzForce CE.
  *
@@ -24,6 +24,8 @@ import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
@@ -52,6 +54,8 @@ import org.ow2.authzforce.xacml.json.model.LimitsCheckingJSONObject;
 @Provider
 public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>, MessageBodyWriter<JSONObject>
 {
+	private static final BadRequestException EMPTY_JSON_OBJECT_BAD_REQUEST_EXCEPTION = new BadRequestException("object cannot be empty");
+
 	private interface JsonObjectFactory
 	{
 		JSONObject getInstance(final InputStream entityStream);
@@ -92,8 +96,8 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 	}
 
 	/**
-	 * Constructs JSON provider using default insecure {@link JSONTokener} with JSON schema validation. Only for trusted environments or protected by JSON-threat-mitigating proxy (e.g. WAF as in Web
-	 * Application Firewall)
+	 * Constructs JSON provider using default insecure {@link JSONTokener} with single JSON schema validation. Only for trusted environments or protected by JSON-threat-mitigating proxy (e.g. WAF as
+	 * in Web Application Firewall)
 	 * 
 	 * @param schema
 	 *            JSON schema, null iff no schema validation shall occur
@@ -107,6 +111,42 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 			protected void schemaValidate(final JSONObject jsonObj)
 			{
 				schema.validate(jsonObj);
+			}
+
+		};
+	}
+
+	/**
+	 * Constructs JSON provider using default insecure {@link JSONTokener} with validation against a given schema depending on the input JSON root property. Only for trusted environments or protected
+	 * by JSON-threat-mitigating proxy (e.g. WAF as in Web Application Firewall).
+	 * 
+	 * @param schemasByPropertyName
+	 *            mappings of JSON property names to schemas, defining which schema to apply according to which (root) property the input JSON object has; if {@code schemasByPropertyName} is empty, or
+	 *            {@code schemasByPropertyName} does not contain any schema for the input JSON (root) property, no schema validation shall occur. Any input JSON without any root property is considered
+	 *            invalid.
+	 */
+	public JsonRiJaxrsProvider(final Map<String, Schema> schemasByPropertyName)
+	{
+		jsonObjectFactory = schemasByPropertyName == null || schemasByPropertyName.isEmpty() ? DEFAULT_JSON_TOKENER_FACTORY : new BaseJsonObjectFactory()
+		{
+
+			@Override
+			protected void schemaValidate(final JSONObject jsonObj)
+			{
+				final Iterator<String> keysIt = jsonObj.keys();
+				if (!keysIt.hasNext())
+				{
+					/*
+					 * JSONException extends RuntimeException so it is not caught as IllegalArgumentException
+					 */
+					throw EMPTY_JSON_OBJECT_BAD_REQUEST_EXCEPTION;
+				}
+
+				final Schema schema = schemasByPropertyName.get(keysIt.next());
+				if (schema != null)
+				{
+					schema.validate(jsonObj);
+				}
 			}
 
 		};
@@ -141,32 +181,76 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 	 *            JSON schema, null iff no schema validation shall occur
 	 * 
 	 * @param maxJsonStringSize
-	 *            allowed maximum size of JSON keys and string values. If negative or zero, limits are ignored and this is equivalent to {@link JsonRiJaxrsProvider#JsonRiJaxrsProvider()}.
+	 *            allowed maximum size of JSON keys and string values. Negative or zero values not allowed.
 	 * @param maxNumOfImmediateChildren
-	 *            allowed maximum number of keys (therefore key-value pairs) in JSON object, or items in JSON array. If negative or zero, limits are ignored and this is equivalent to
-	 *            {@link JsonRiJaxrsProvider#JsonRiJaxrsProvider()}.
+	 *            allowed maximum number of keys (therefore key-value pairs) in JSON object, or items in JSON array. Negative or zero values not allowed.
 	 * @param maxDepth
-	 *            allowed maximum depth of JSON object. If negative or zero, limits are ignored and this is equivalent to {@link JsonRiJaxrsProvider#JsonRiJaxrsProvider()}.
+	 *            allowed maximum depth of JSON object. Negative or zero values not allowed.
 	 */
 	public JsonRiJaxrsProvider(final Schema schema, final int maxJsonStringSize, final int maxNumOfImmediateChildren, final int maxDepth)
 	{
 		if (maxJsonStringSize <= 0 || maxNumOfImmediateChildren <= 0 || maxDepth <= 0)
 		{
-			jsonObjectFactory = DEFAULT_JSON_TOKENER_FACTORY;
+			throw new IllegalArgumentException("one of the arguments maxJsonStringSize, maxNumOfImmediateChildren or maxDepth is negative or null");
 		}
-		else
-		{
-			jsonObjectFactory = schema == null ? new LimitsCheckingJsonObjectFactory(maxJsonStringSize, maxNumOfImmediateChildren, maxDepth) : new LimitsCheckingJsonObjectFactory(maxJsonStringSize,
-					maxNumOfImmediateChildren, maxDepth)
-			{
-				@Override
-				protected void schemaValidate(final JSONObject jsonObj)
-				{
-					schema.validate(jsonObj);
-				}
+		jsonObjectFactory = schema == null ? new LimitsCheckingJsonObjectFactory(maxJsonStringSize, maxNumOfImmediateChildren, maxDepth)
+		        : new LimitsCheckingJsonObjectFactory(maxJsonStringSize, maxNumOfImmediateChildren, maxDepth)
+		        {
+			        @Override
+			        protected void schemaValidate(final JSONObject jsonObj)
+			        {
+				        schema.validate(jsonObj);
+			        }
 
-			};
+		        };
+	}
+
+	/**
+	 * Constructs JSON provider using hardened {@link JSONTokener} that checks limits on JSON structures, such as arrays and strings, in order to mitigate content-level attacks. Downside: it is slower
+	 * at parsing than for {@link JsonRiJaxrsProvider#JsonRiJaxrsProvider()}. This provider also validates input JSON against a given schema depending on the input JSON root property.
+	 * 
+	 * @param schemasByPropertyName
+	 *            mappings of JSON property names to schemas, defining which schema to apply according to which (root) property the input JSON object has; if {@code schemasByPropertyName} is empty, or
+	 *            {@code schemasByPropertyName} does not contain any schema for the input JSON (root) property, no schema validation shall occur. Any input JSON without any root property is considered
+	 *            invalid.
+	 * 
+	 * @param maxJsonStringSize
+	 *            allowed maximum size of JSON keys and string values. Negative or zero values not allowed.
+	 * @param maxNumOfImmediateChildren
+	 *            allowed maximum number of keys (therefore key-value pairs) in JSON object, or items in JSON array. Negative or zero values not allowed.
+	 * @param maxDepth
+	 *            allowed maximum depth of JSON object. Negative or zero values not allowed.
+	 */
+	public JsonRiJaxrsProvider(final Map<String, Schema> schemasByPropertyName, final int maxJsonStringSize, final int maxNumOfImmediateChildren, final int maxDepth)
+	{
+		if (maxJsonStringSize <= 0 || maxNumOfImmediateChildren <= 0 || maxDepth <= 0)
+		{
+			throw new IllegalArgumentException("one of the arguments maxJsonStringSize, maxNumOfImmediateChildren or maxDepth is negative or null");
 		}
+
+		jsonObjectFactory = schemasByPropertyName == null || schemasByPropertyName.isEmpty() ? new LimitsCheckingJsonObjectFactory(maxJsonStringSize, maxNumOfImmediateChildren, maxDepth)
+		        : new LimitsCheckingJsonObjectFactory(maxJsonStringSize, maxNumOfImmediateChildren, maxDepth)
+		        {
+			        @Override
+			        protected void schemaValidate(final JSONObject jsonObj)
+			        {
+				        final Iterator<String> keysIt = jsonObj.keys();
+				        if (!keysIt.hasNext())
+				        {
+					        /*
+					         * JSONException extends RuntimeException so it is not caught as IllegalArgumentException
+					         */
+					        throw EMPTY_JSON_OBJECT_BAD_REQUEST_EXCEPTION;
+				        }
+
+				        final Schema schema = schemasByPropertyName.get(keysIt.next());
+				        if (schema != null)
+				        {
+					        schema.validate(jsonObj);
+				        }
+			        }
+
+		        };
 	}
 
 	@Override
@@ -183,7 +267,7 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 
 	@Override
 	public void writeTo(final JSONObject o, final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders,
-			final OutputStream entityStream) throws IOException, WebApplicationException
+	        final OutputStream entityStream) throws IOException, WebApplicationException
 	{
 		try (final OutputStreamWriter writer = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8))
 		{
@@ -199,7 +283,7 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 
 	@Override
 	public JSONObject readFrom(final Class<JSONObject> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType, final MultivaluedMap<String, String> httpHeaders,
-			final InputStream entityStream) throws IOException, WebApplicationException
+	        final InputStream entityStream) throws IOException, WebApplicationException
 	{
 		try
 		{
