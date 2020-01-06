@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2019 THALES.
+ * Copyright 2012-2020 THALES.
  *
  * This file is part of AuthzForce CE.
  *
@@ -40,6 +40,7 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -58,7 +59,7 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 
 	private interface JsonObjectFactory
 	{
-		JSONObject getInstance(final InputStream entityStream);
+		JSONObject getInstance(final InputStream entityStream) throws ValidationException;
 	}
 
 	private static class BaseJsonObjectFactory implements JsonObjectFactory
@@ -74,7 +75,7 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 		}
 
 		@Override
-		public final JSONObject getInstance(final InputStream entityStream)
+		public final JSONObject getInstance(final InputStream entityStream) throws ValidationException
 		{
 			final JSONObject jsonObj = parse(entityStream);
 			schemaValidate(jsonObj);
@@ -108,7 +109,7 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 		{
 
 			@Override
-			protected void schemaValidate(final JSONObject jsonObj)
+			protected void schemaValidate(final JSONObject jsonObj) throws ValidationException
 			{
 				schema.validate(jsonObj);
 			}
@@ -131,7 +132,7 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 		{
 
 			@Override
-			protected void schemaValidate(final JSONObject jsonObj)
+			protected void schemaValidate(final JSONObject jsonObj) throws ValidationException
 			{
 				final Iterator<String> keysIt = jsonObj.keys();
 				if (!keysIt.hasNext())
@@ -197,7 +198,7 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 		        : new LimitsCheckingJsonObjectFactory(maxJsonStringSize, maxNumOfImmediateChildren, maxDepth)
 		        {
 			        @Override
-			        protected void schemaValidate(final JSONObject jsonObj)
+			        protected void schemaValidate(final JSONObject jsonObj) throws ValidationException
 			        {
 				        schema.validate(jsonObj);
 			        }
@@ -232,7 +233,7 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 		        : new LimitsCheckingJsonObjectFactory(maxJsonStringSize, maxNumOfImmediateChildren, maxDepth)
 		        {
 			        @Override
-			        protected void schemaValidate(final JSONObject jsonObj)
+			        protected void schemaValidate(final JSONObject jsonObj) throws ValidationException
 			        {
 				        final Iterator<String> keysIt = jsonObj.keys();
 				        if (!keysIt.hasNext())
@@ -289,10 +290,10 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 		{
 			return jsonObjectFactory.getInstance(entityStream);
 		}
-		catch (final JSONException e)
+		catch (final JSONException | ValidationException e)
 		{
 			/*
-			 * JSONException extends RuntimeException so it is not caught as IllegalArgumentException
+			 * JSONException/ValidationException extend RuntimeException so it is not caught as IllegalArgumentException
 			 */
 			throw new BadRequestException(e);
 		}
