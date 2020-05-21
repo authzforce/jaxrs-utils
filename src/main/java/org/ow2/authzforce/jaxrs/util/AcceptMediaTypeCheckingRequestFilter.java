@@ -17,6 +17,7 @@
  */
 package org.ow2.authzforce.jaxrs.util;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,8 +27,6 @@ import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.MediaType;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * FastInfoset request blocker
@@ -49,7 +48,7 @@ public final class AcceptMediaTypeCheckingRequestFilter implements ContainerRequ
 	{
 		final Set<MediaType> updatableSet = StreamSupport.stream(mediaTypes.spliterator(), false).map(MediaType::valueOf).collect(Collectors.toSet());
 		updatableSet.add(MediaType.WILDCARD_TYPE);
-		validMediaTypes = ImmutableSet.copyOf(updatableSet);
+		validMediaTypes = Collections.unmodifiableSet(updatableSet);
 	}
 
 	@Override
