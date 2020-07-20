@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file following the [K
 Issues reported on [GitHub](https://github.com/authzforce/core/issues) are referenced in the form of `[GH-N]`, where N is the issue number. Issues reported on [OW2](https://jira.ow2.org/browse/AUTHZFORCE/) are mentioned in the form of `[OW2-N]`, where N is the issue number.
 
 
+## 1.6.0
+### Changed
+- Upgraded parent project: 7.6.1
+	- Upgraded dependency slf4j-api: 1.7.30
+- BadRequestExceptionMapper: new constructor argument to configured the verbosity of returned BadRequest messages in terms of depth of the returned error stacktrace. The higher the verbosity, the more error info and the easier for clients to troubleshoot.
+
+
+### Fixed
+- #1 : CVE-2018-8088 affecting slf4j
+
+
 ## 1.5.0
 ### Changed
 - Upgraded parent project: 7.6.0
