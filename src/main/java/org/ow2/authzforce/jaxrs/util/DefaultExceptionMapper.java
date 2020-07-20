@@ -35,7 +35,7 @@ public class DefaultExceptionMapper implements ExceptionMapper<Throwable>
 {
 	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultExceptionMapper.class);
 	private final static String INTERNAL_ERR_MSG = "Internal server error:";
-	private final static JaxbErrorMessage ERROR = new JaxbErrorMessage("Internal server error. Retry later or contact the administrator.");
+	private final static JaxbErrorMessage ERROR = new JaxbErrorMessage("Internal server error. Retry later or contact the administrator.", null);
 
 	@Override
 	public Response toResponse(final Throwable exception)

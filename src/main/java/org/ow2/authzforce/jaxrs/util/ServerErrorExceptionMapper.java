@@ -37,7 +37,7 @@ public class ServerErrorExceptionMapper implements ExceptionMapper<ServerErrorEx
 {
 	private final static Logger LOGGER = LoggerFactory.getLogger(ServerErrorExceptionMapper.class);
 	private final static String INTERNAL_ERR_MSG = "Internal server error:";
-	private final static JaxbErrorMessage ERROR = new JaxbErrorMessage("Internal server error. Retry later or contact the administrator.");
+	private final static JaxbErrorMessage ERROR = new JaxbErrorMessage("Internal server error. Retry later or contact the administrator.", null);
 
 	@Override
 	public Response toResponse(final ServerErrorException exception)

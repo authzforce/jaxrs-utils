@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlType;
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = { "message" })
+@XmlType(name = "", propOrder = { "message", "cause" })
 @XmlRootElement(name = "error")
 public class JaxbErrorMessage
 {
@@ -36,25 +36,31 @@ public class JaxbErrorMessage
 	@XmlElement(required = true)
 	protected String message;
 
-	/**
-	 * Default no-arg constructor
-	 * 
-	 */
-	protected JaxbErrorMessage()
-	{
-		super();
-	}
+	@XmlElement
+	protected JaxbErrorMessage cause;
 
 	/**
 	 * Fully-initialising value constructor
 	 * 
 	 * @param message
 	 *            error message
+	 * @param cause
+	 *            optional cause for the error
 	 * 
 	 */
-	public JaxbErrorMessage(final String message)
+	public JaxbErrorMessage(final String message, final JaxbErrorMessage cause)
 	{
 		this.message = message;
+		this.cause = cause;
+	}
+
+	/**
+	 * Required no-arg constructor
+	 * 
+	 */
+	public JaxbErrorMessage()
+	{
+		this("", null);
 	}
 
 	/**
@@ -69,15 +75,14 @@ public class JaxbErrorMessage
 	}
 
 	/**
-	 * Sets the value of the message property.
+	 * Gets the value of the cause property.
 	 * 
-	 * @param value
-	 *            allowed object is {@link String }
+	 * @return possible object is {@link JaxbErrorMessage }
 	 * 
 	 */
-	protected void setMessage(final String value)
+	public JaxbErrorMessage getCause()
 	{
-		this.message = value;
+		return cause;
 	}
 
 }

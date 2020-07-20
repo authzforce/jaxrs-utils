@@ -34,7 +34,7 @@ public class UnsupportedOperationExceptionMapper implements ExceptionMapper<Unsu
 	@Override
 	public Response toResponse(final UnsupportedOperationException exception)
 	{
-		final JaxbErrorMessage error = new JaxbErrorMessage(exception.getMessage());
+		final JaxbErrorMessage error = new JaxbErrorMessage(exception.getMessage(), null);
 		return Response.status(Response.Status.NOT_IMPLEMENTED).entity(error).build();
 	}
 }
