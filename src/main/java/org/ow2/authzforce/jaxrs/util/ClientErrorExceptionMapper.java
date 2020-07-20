@@ -40,7 +40,7 @@ public class ClientErrorExceptionMapper implements ExceptionMapper<ClientErrorEx
 		// on what resource could not be found, so return this message to the client
 		if (exception.getCause() != null)
 		{
-			final JaxbErrorMessage errorEntity = new JaxbErrorMessage(exception.getCause().getMessage());
+			final JaxbErrorMessage errorEntity = new JaxbErrorMessage(exception.getCause().getMessage(), null);
 			return Response.status(exception.getResponse().getStatus()).entity(errorEntity).build();
 		}
 

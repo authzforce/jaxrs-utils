@@ -20,6 +20,7 @@
  */
 package org.ow2.authzforce.jaxrs.util;
 
+import java.beans.ConstructorProperties;
 import java.util.regex.Pattern;
 
 import javax.ws.rs.BadRequestException;
@@ -41,6 +42,43 @@ public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestExce
 	private static final Logger LOGGER = LoggerFactory.getLogger(BadRequestExceptionMapper.class);
 	private static final Pattern JAXBEXCEPTION_MSG_START_PATTERN = Pattern.compile("^JAXBException occurred :", Pattern.CASE_INSENSITIVE);
 	private static final String INVALID_PARAM_MSG_PREFIX = "Invalid parameters: ";
+	private final int verbosityLevel;
+
+	private static JaxbErrorMessage newJaxbErrorMessage(final Throwable cause, final int errVerbosityLevel)
+	{
+		if (errVerbosityLevel == 0 || cause == null)
+		{
+			return null;
+		}
+
+		return new JaxbErrorMessage(cause.getMessage(), newJaxbErrorMessage(cause.getCause(), errVerbosityLevel - 1));
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param verbosityLevel
+	 *            level of verbosity of error information, i.e. depth of exception stacktrace to include in the response returned from {@link #toResponse(BadRequestException)}. Not applicable for
+	 *            {@link SAXException}, {@link JAXBException} or {@link ClassCastException}.
+	 */
+	@ConstructorProperties({ "verbosityLevel" })
+	public BadRequestExceptionMapper(final int verbosityLevel)
+	{
+		if (verbosityLevel < 0)
+		{
+			throw new IllegalArgumentException("Invalid verbosity level: " + verbosityLevel + ". Expected >= 0.");
+		}
+
+		this.verbosityLevel = verbosityLevel;
+	}
+
+	/**
+	 * Default constructor
+	 */
+	public BadRequestExceptionMapper()
+	{
+		this(0);
+	}
 
 	@Override
 	public Response toResponse(final BadRequestException exception)
@@ -49,45 +87,20 @@ public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestExce
 		final Response oldResp = exception.getResponse();
 		final String errMsg;
 		final Throwable cause = exception.getCause();
-		if (cause != null)
+		final Throwable returnedCause;
+
+		if (verbosityLevel == 0)
 		{
-			// JAXB schema validation error
-			if (cause instanceof SAXException)
-			{
-				final Throwable internalCause = cause.getCause();
-				if (internalCause instanceof JAXBException)
-				{
-					final Throwable linkedEx = ((JAXBException) internalCause).getLinkedException();
-					errMsg = INVALID_PARAM_MSG_PREFIX + linkedEx.getMessage();
-				}
-				else
-				{
-					errMsg = INVALID_PARAM_MSG_PREFIX + cause.getMessage();
-				}
-			}
-			else if (cause instanceof JAXBException)
-			{
-				final Throwable linkedEx = ((JAXBException) cause).getLinkedException();
-				errMsg = INVALID_PARAM_MSG_PREFIX + linkedEx.getMessage();
-			}
-			else if (cause instanceof IllegalArgumentException)
-			{
-				final Throwable internalCause = cause.getCause();
-				errMsg = cause.getMessage() + (internalCause == null ? "" : ": " + internalCause.getMessage());
-			}
-			else if (cause instanceof ClassCastException)
-			{
-				errMsg = "Wrong type of input: " + cause.getMessage();
-			}
-			else
-			{
-				errMsg = cause.getMessage();
-			}
+			errMsg = "";
+			returnedCause = null;
 		}
-		else
+		else if (cause == null)
 		{
-			// handle case where cause message is only in the response message (no exception object
-			// in stacktrace), e.g. JAXBException
+			returnedCause = null;
+
+			/*
+			 * handle case where cause message is only in the response message (no exception object in stacktrace), e.g. JAXBException
+			 */
 			final Object oldEntity = oldResp.getEntity();
 			if (oldEntity instanceof String)
 			{
@@ -96,16 +109,51 @@ public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestExce
 			}
 			else
 			{
-				errMsg = null;
+				return oldResp;
+			}
+
+		}
+		else
+		{
+			/*
+			 * cause != null && verbosityLevel >= 1
+			 */
+			// JAXB schema validation error
+			if (cause instanceof SAXException)
+			{
+				final Throwable internalCause = cause.getCause();
+				if (internalCause instanceof JAXBException)
+				{
+					final Throwable linkedEx = ((JAXBException) internalCause).getLinkedException();
+					errMsg = INVALID_PARAM_MSG_PREFIX + linkedEx.getMessage();
+					returnedCause = linkedEx.getCause();
+				}
+				else
+				{
+					errMsg = INVALID_PARAM_MSG_PREFIX + cause.getMessage();
+					returnedCause = cause.getCause();
+				}
+			}
+			else if (cause instanceof JAXBException)
+			{
+				final Throwable linkedEx = ((JAXBException) cause).getLinkedException();
+				errMsg = INVALID_PARAM_MSG_PREFIX + linkedEx.getMessage();
+				returnedCause = linkedEx.getCause();
+			}
+			else if (cause instanceof ClassCastException)
+			{
+				errMsg = "Wrong type of input: " + cause.getMessage();
+				returnedCause = null;
+			}
+			else
+			{
+				errMsg = cause.getMessage();
+				returnedCause = cause.getCause();
 			}
 		}
 
-		if (errMsg != null)
-		{
-			final JaxbErrorMessage errorEntity = new JaxbErrorMessage(errMsg);
-			return Response.status(Response.Status.BAD_REQUEST).entity(errorEntity).build();
-		}
-
-		return oldResp;
+		final JaxbErrorMessage errorEntity = errMsg == null ? new JaxbErrorMessage("", null) : new JaxbErrorMessage(errMsg, newJaxbErrorMessage(returnedCause, verbosityLevel - 1));
+		return Response.status(Response.Status.BAD_REQUEST).entity(errorEntity).build();
 	}
+
 }
