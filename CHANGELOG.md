@@ -4,6 +4,15 @@ All notable changes to this project are documented in this file following the [K
 Issues reported on [GitHub](https://github.com/authzforce/core/issues) are referenced in the form of `[GH-N]`, where N is the issue number. Issues reported on [OW2](https://jira.ow2.org/browse/AUTHZFORCE/) are mentioned in the form of `[OW2-N]`, where N is the issue number.
 
 
+## 2.0.0
+### Changed
+- Upgraded supported JRE to Java 11. Java 8 no longer supported
+- Upgraded parent project: 8.0.0
+- Upgraded Jakarta RESTful Web Services API to 2.1.6
+- Upgraded JAXB (Jakarta XML Binding) to 2.3.3
+- upgraded authzforce-ce-xacml-json-model to 3.0.0
+
+
 ## 1.6.0
 ### Changed
 - Upgraded parent project: 7.6.1

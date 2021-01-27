@@ -1,5 +1,5 @@
 /**
- * Copyright 2012-2020 THALES.
+ * Copyright 2012-2021 THALES.
  *
  * This file is part of AuthzForce CE.
  *
@@ -17,10 +17,7 @@
  */
 package org.ow2.authzforce.jaxrs.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -169,7 +166,7 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 		@Override
 		protected final JSONObject parse(final InputStream entityStream)
 		{
-			return new LimitsCheckingJSONObject(entityStream, maxJsonStringSize, maxNumOfImmediateChildren, maxDepth);
+			return new LimitsCheckingJSONObject(new InputStreamReader(entityStream, StandardCharsets.UTF_8), maxJsonStringSize, maxNumOfImmediateChildren, maxDepth);
 		}
 
 	}
