@@ -4,3 +4,5 @@
 /.pmd
 /.pmdruleset.xml
 /.project
+**/.idea
+*.iml
