@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2012-2021 THALES.
  *
  * This file is part of AuthzForce CE.
@@ -281,7 +281,7 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 
 	@Override
 	public JSONObject readFrom(final Class<JSONObject> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType, final MultivaluedMap<String, String> httpHeaders,
-	        final InputStream entityStream) throws IOException, WebApplicationException
+	        final InputStream entityStream) throws WebApplicationException
 	{
 		try
 		{
