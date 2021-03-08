@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file following the [K
 Issues reported on [GitHub](https://github.com/authzforce/core/issues) are referenced in the form of `[GH-N]`, where N is the issue number. Issues reported on [OW2](https://jira.ow2.org/browse/AUTHZFORCE/) are mentioned in the form of `[OW2-N]`, where N is the issue number.
 
 
+## 2.0.1
+### Fixed
+- Upgraded authzforce-ce-xacml-json-model to 3.0.2: fixes issue with method `XacmlJsonUtils#canonicalizeResponse()` when comparing similar XACML/JSON responses (linked to https://github.com/stleary/JSON-java/issues/589 )
+
+
 ## 2.0.0
 ### Changed
 - Upgraded supported JRE to Java 11. Java 8 no longer supported
