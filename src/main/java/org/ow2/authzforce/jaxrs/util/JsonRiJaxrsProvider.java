@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 THALES.
+ * Copyright 2012-2023 THALES.
  *
  * This file is part of AuthzForce CE.
  *
@@ -267,7 +267,7 @@ public final class JsonRiJaxrsProvider implements MessageBodyReader<JSONObject>,
 	public void writeTo(final JSONObject o, final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders,
 	        final OutputStream entityStream) throws IOException, WebApplicationException
 	{
-		try (final OutputStreamWriter writer = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8))
+		try (OutputStreamWriter writer = new OutputStreamWriter(entityStream, StandardCharsets.UTF_8))
 		{
 			o.write(writer);
 		}
