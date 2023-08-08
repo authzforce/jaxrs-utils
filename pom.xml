@@ -3,7 +3,7 @@
    <parent>
       <groupId>org.ow2.authzforce</groupId>
       <artifactId>authzforce-ce-parent</artifactId>
-      <version>8.0.3</version>
+      <version>8.5.0</version>
    </parent>
    <artifactId>authzforce-ce-jaxrs-utils</artifactId>
    <version>2.0.4-SNAPSHOT</version>
@@ -40,7 +40,7 @@
       <dependency>
          <groupId>org.ow2.authzforce</groupId>
          <artifactId>authzforce-ce-xacml-json-model</artifactId>
-         <version>3.0.4</version>
+         <version>3.0.5</version>
       </dependency>
    </dependencies>
    <build>
@@ -81,6 +81,7 @@
             <configuration>
                <!-- The plugin has numerous issues with version matching, which triggers false positives so we need a "suppresion" file for those. More info: https://github.com/jeremylong/DependencyCheck/issues -->
                <suppressionFile>owasp-dependency-check-suppression.xml</suppressionFile>
+				<failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
             </configuration>
             <executions>
                <execution>
