@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file following the [K
 Issues reported on [GitHub](https://github.com/authzforce/core/issues) are referenced in the form of `[GH-N]`, where N is the issue number. Issues reported on [OW2](https://jira.ow2.org/browse/AUTHZFORCE/) are mentioned in the form of `[OW2-N]`, where N is the issue number.
 
 
+## 2.0.4
+### Fixed
+- CVEs affecting dependencies by upgrading:
+  - parent project (authzforce-ce-parent): 8.5.0
+  - slf4j-api: 1.7.36
+  - authzforce-ce-xacml-json-model: 3.0.5
+  - spring-core: 5.3.29
+  - json: 20230227
+  - org.everit.json.schema, renamed everit-json-schema: 1.14.2
+- `XacmlAttributeId` enum: added missing value for standard XACML 3.0 Core attribute ID: `urn:oasis:names:tc:xacml:2.0:resource:target-namespace (used for <Content> processing).
+
+
 ## 2.0.3
 ### Fixed
 - CVE-2021-22696 and CVE-2021-3046 fixed by upgrading **authzforce-ce-parent to v8.0.3**
