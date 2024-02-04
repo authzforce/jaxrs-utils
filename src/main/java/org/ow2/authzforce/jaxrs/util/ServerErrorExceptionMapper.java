@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 THALES.
+ * Copyright 2012-2024 THALES.
  *
  * This file is part of AuthzForce CE.
  *
@@ -17,11 +17,11 @@
  */
 package org.ow2.authzforce.jaxrs.util;
 
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.ServerErrorException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
