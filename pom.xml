@@ -3,7 +3,7 @@
    <parent>
       <groupId>org.ow2.authzforce</groupId>
       <artifactId>authzforce-ce-parent</artifactId>
-      <version>8.5.0</version>
+      <version>9.1.0</version>
    </parent>
    <artifactId>authzforce-ce-jaxrs-utils</artifactId>
    <version>2.0.5-SNAPSHOT</version>
@@ -40,7 +40,7 @@
       <dependency>
          <groupId>org.ow2.authzforce</groupId>
          <artifactId>authzforce-ce-xacml-json-model</artifactId>
-         <version>3.0.5</version>
+         <version>4.1.0</version>
       </dependency>
    </dependencies>
    <build>
@@ -78,6 +78,7 @@
             <!-- Consider combining with Red Hat Victims and OSS Index. More info on Victims vs. Dependency-check: https://bugzilla.redhat.com/show_bug.cgi?id=1388712 -->
             <groupId>org.owasp</groupId>
             <artifactId>dependency-check-maven</artifactId>
+			 <version>9.0.9</version>
             <configuration>
                <!-- The plugin has numerous issues with version matching, which triggers false positives so we need a "suppresion" file for those. More info: https://github.com/jeremylong/DependencyCheck/issues -->
                <suppressionFile>owasp-dependency-check-suppression.xml</suppressionFile>

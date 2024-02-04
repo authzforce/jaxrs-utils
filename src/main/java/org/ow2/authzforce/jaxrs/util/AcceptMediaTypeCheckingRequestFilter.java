@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 THALES.
+ * Copyright 2012-2024 THALES.
  *
  * This file is part of AuthzForce CE.
  *
@@ -23,10 +23,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.ws.rs.NotAcceptableException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.NotAcceptableException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * FastInfoset request blocker
