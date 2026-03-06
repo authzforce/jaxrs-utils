@@ -78,7 +78,7 @@ public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestExce
 	}
 
 	@Override
-	protected final void finalize() throws Throwable
+	protected final void finalize()
 	{
 		// CT_CONSTRUCTOR_THROW
 	}
