@@ -4,5 +4,6 @@
 /.pmd
 /.pmdruleset.xml
 /.project
+/.mvn
 **/.idea
 *.iml
