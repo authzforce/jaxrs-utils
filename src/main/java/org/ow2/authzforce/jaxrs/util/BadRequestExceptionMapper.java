@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 THALES.
+ * Copyright 2012-2026 THALES.
  *
  * This file is part of AuthzForce CE.
  *
@@ -75,6 +75,12 @@ public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestExce
 	public BadRequestExceptionMapper()
 	{
 		this(0);
+	}
+
+	@Override
+	protected final void finalize() throws Throwable
+	{
+		// CT_CONSTRUCTOR_THROW
 	}
 
 	@Override
