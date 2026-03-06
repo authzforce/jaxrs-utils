@@ -3,6 +3,17 @@ All notable changes to this project are documented in this file following the [K
 
 Issues reported on [GitHub](https://github.com/authzforce/core/issues) are referenced in the form of `[GH-N]`, where N is the issue number. Issues reported on [OW2](https://jira.ow2.org/browse/AUTHZFORCE/) are mentioned in the form of `[OW2-N]`, where N is the issue number.
 
+
+## 3.1.0
+### Changed
+- Upgraded authzforce-ce-parent: 9.2.0
+- Upgraded dependencies:
+    - slf4j-api: 2.0.17
+    - jakarta.xml.bind-api: 4.0.4
+    - jakarta.ws.rs-api: 3.1.0
+    - authzforce-ce-xacml-json-model: 4.2.0
+
+
 ## 3.0.0
 ### Changed
 - Upgraded parent project: 9.1.0:
